@@ -172,7 +172,8 @@ export class BlueGreenUsingEcsStack extends cdk.Stack {
             healthCheck: {
                 path: "/",
                 timeout: Duration.seconds(10),
-                interval: Duration.seconds(15)
+                interval: Duration.seconds(15),
+                healthyHttpCodes: "200,404"
             }
         });
 
@@ -185,7 +186,8 @@ export class BlueGreenUsingEcsStack extends cdk.Stack {
             healthCheck: {
                 path: "/",
                 timeout: Duration.seconds(10),
-                interval: Duration.seconds(15)
+                interval: Duration.seconds(15),
+                healthyHttpCodes: "200,404"
             }
         });
 
@@ -200,10 +202,10 @@ export class BlueGreenUsingEcsStack extends cdk.Stack {
         });
 
         // ================================================================================================
-        // CloudWatch Alarms for 5XX errors
-        const blue5xxMetric = new cloudWatch.Metric({
+        // CloudWatch Alarms for 4XX errors
+        const blue4xxMetric = new cloudWatch.Metric({
             namespace: 'AWS/ApplicationELB',
-            metricName: 'HTTPCode_Target_5XX_Count',
+            metricName: 'HTTPCode_Target_4XX_Count',
             dimensions: {
                 TargetGroup: blueGroup.targetGroupFullName,
                 LoadBalancer: alb.loadBalancerFullName
@@ -211,17 +213,17 @@ export class BlueGreenUsingEcsStack extends cdk.Stack {
             statistic: cloudWatch.Statistic.SUM,
             period: Duration.minutes(1)
         });
-        const blueGroupAlarm = new cloudWatch.Alarm(this, "blue5xxErrors", {
-            alarmName: "Blue_5xx_Alarm",
-            alarmDescription: "CloudWatch Alarm for the 5xx errors of Blue target group",
-            metric: blue5xxMetric,
+        const blueGroupAlarm = new cloudWatch.Alarm(this, "blue4xxErrors", {
+            alarmName: "Blue_4xx_Alarm",
+            alarmDescription: "CloudWatch Alarm for the 4xx errors of Blue target group",
+            metric: blue4xxMetric,
             threshold: 1,
             evaluationPeriods: 1
         });
 
-        const green5xxMetric = new cloudWatch.Metric({
+        const green4xxMetric = new cloudWatch.Metric({
             namespace: 'AWS/ApplicationELB',
-            metricName: 'HTTPCode_Target_5XX_Count',
+            metricName: 'HTTPCode_Target_4XX_Count',
             dimensions: {
                 TargetGroup: greenGroup.targetGroupFullName,
                 LoadBalancer: alb.loadBalancerFullName
@@ -229,10 +231,10 @@ export class BlueGreenUsingEcsStack extends cdk.Stack {
             statistic: cloudWatch.Statistic.SUM,
             period: Duration.minutes(1)
         });
-        const greenGroupAlarm = new cloudWatch.Alarm(this, "green5xxErrors", {
-            alarmName: "Green_5xx_Alarm",
-            alarmDescription: "CloudWatch Alarm for the 5xx errors of Green target group",
-            metric: green5xxMetric,
+        const greenGroupAlarm = new cloudWatch.Alarm(this, "green4xxErrors", {
+            alarmName: "Green_4xx_Alarm",
+            alarmDescription: "CloudWatch Alarm for the 4xx errors of Green target group",
+            metric: green4xxMetric,
             threshold: 1,
             evaluationPeriods: 1
         });
